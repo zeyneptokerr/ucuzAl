@@ -1,0 +1,5 @@
+<form class="form-header" onsubmit="return false;" method="GET">
+    <input #myInput type="text" class="au-input au-input-xl" placeholder="Aramak istediğiniz ürünü giriniz..."
+        (keyup.enter)="doSearch(myInput.value)"/>
+    <button class="au-btn-submit" type="submit" click="doSearch(myInput.value)">Ara</button>
+</form>
