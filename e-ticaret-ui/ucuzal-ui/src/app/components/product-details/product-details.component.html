@@ -3,7 +3,7 @@
         <img src="{{ product.imageUrl }}" class="detail-img">
         <h3>{{ product.name }}</h3>
         <div class="price"> {{ product.unitPrice | currency: 'TL' }}</div>
-        <a href="#" class="primary-btn">Sepete Ekle</a>
+        <button (click)="addToCart()" class="btn btn-primary btn-sm">Sepete Ekle</button>
         <hr>
         <h4>Ürün Açıklaması</h4>
         <p> {{ product.description }}</p>
