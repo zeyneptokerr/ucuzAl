@@ -8,6 +8,7 @@ import { SearchComponent } from "./components/search/search.component";
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { CartStatusComponent } from "./components/cart-status/cart-status.component";
 import { UcuzAlFormService } from './services/ucuz-al-form.service';
+import { CheckoutService } from './services/checkout.service';
 
 @Component({
   selector: 'app-root',
@@ -15,7 +16,7 @@ import { UcuzAlFormService } from './services/ucuz-al-form.service';
   imports: [RouterOutlet, ProductListComponent, HttpClientModule, RouterModule, ProductCategoryMenuComponent, SearchComponent, NgbModule, CartStatusComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
-  providers: [ProductService, UcuzAlFormService]
+  providers: [ProductService, UcuzAlFormService, CheckoutService]
 })
 export class AppComponent {
   title = 'ucuzal-ui';

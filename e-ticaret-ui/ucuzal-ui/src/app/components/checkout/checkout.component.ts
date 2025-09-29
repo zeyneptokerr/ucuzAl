@@ -6,6 +6,11 @@ import { Country } from '../../common/country';
 import { State } from '../../common/state';
 import { UcuzAlValidators } from '../../validators/ucuz-al-validators';
 import { CartService } from '../../services/cart.service';
+import { CheckoutService } from '../../services/checkout.service';
+import { Router } from '@angular/router';
+import { Order } from '../../common/order';
+import { OrderItem } from '../../common/order-item';
+import { Purchase } from '../../common/purchase';
 
 @Component({
   selector: 'app-checkout',
@@ -26,7 +31,8 @@ export class CheckoutComponent {
   shippingAddressStates: State[] = [];
   billingAddressStates: State[] = [];
 
-  constructor(private formBuilder: FormBuilder, private ucuzAlFormService: UcuzAlFormService, private cartService: CartService) {}
+  constructor(private formBuilder: FormBuilder, private ucuzAlFormService: UcuzAlFormService, 
+    private cartService: CartService, private checkoutService: CheckoutService, private router: Router) {}
 
   ngOnInit(){
 
@@ -114,8 +120,59 @@ export class CheckoutComponent {
     console.log("butona basıldı");
     if (this.checkoutFormGroup?.invalid) {
       this.checkoutFormGroup.markAllAsTouched();
+      return;
     }
+
+    let order = new Order();
+    order.totalPrice = this.totalPrice;
+    order.totalQuantity = this.totalQuantity;
+
+    const cartItems = this.cartService.cartItems;
+    let orderItems: OrderItem[] = cartItems.map(tempCartItem => new OrderItem(tempCartItem));
+
+    let purchase = new Purchase();
+
+    purchase.customer = this.checkoutFormGroup?.controls['customer'].value;
+    purchase.shippingAddress = this.checkoutFormGroup?.controls['shippingAddress'].value;
+
+    const shippingState: State = JSON.parse(JSON.stringify(purchase.shippingAddress?.state));
+    const shippingCountry: Country = JSON.parse(JSON.stringify(purchase.shippingAddress?.country));
+
+    if (purchase.shippingAddress) {
+      purchase.shippingAddress.state = shippingState.name;
+      purchase.shippingAddress.country = shippingCountry.name;
+    }
+
+    purchase.billingAddress = this.checkoutFormGroup?.controls['billingAddress'].value;
+
+    const billingState: State = JSON.parse(JSON.stringify(purchase.billingAddress?.state));
+    const billingCountry: Country = JSON.parse(JSON.stringify(purchase.billingAddress?.country));
+
+    if (purchase.billingAddress) {
+      purchase.billingAddress.state = billingState.name;
+      purchase.billingAddress.country = billingCountry.name;
+    }
+    purchase.order = order;
+    purchase.orderItems = orderItems;
+    this.checkoutService.placeOrder(purchase).subscribe({
+      next: response => {
+        alert(`Siparişiniz başarılı bir şekilde alındı. Sipariş numaranız: ${response.orderTrackingNumber}`);
+        this.resetCart();
+      },
+      error: err => {
+        alert(`Siparişiniz alınırken bir hata oluştu: ${err.message}`);
+      }
+    });
     console.log(this.checkoutFormGroup?.get('customer')?.value);
+  }
+  
+  resetCart() {
+    this.cartService.cartItems = [];
+    this.cartService.totalPrice.next(0);
+    this.cartService.totalQuantity.next(0);
+
+    this.checkoutFormGroup?.reset();
+    this.router.navigateByUrl("/products");
   }
 
   copyShippingAddressToBillingAddress(event: any) {
